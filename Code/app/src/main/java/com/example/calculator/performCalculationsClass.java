@@ -15,6 +15,9 @@ public class performCalculationsClass {
                 returnCalc = num1 * num2;
                 break;
             case "/":
+                if (num2 == 0) {
+                    return "NaN";
+                }
                 returnCalc = num1 / num2;
                 break;
         }
