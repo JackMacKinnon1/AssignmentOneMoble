@@ -1,0 +1,25 @@
+<resources>
+    <string name="app_name">Calculator</string>
+    <string name="clearString">C</string>
+    <string name="divideString">/</string>
+    <string name="backspaceString"><![CDATA[<-]]></string>
+    <string name="sevenString">7</string>
+    <string name="eightString">8</string>
+    <string name="nineString">9</string>
+    <string name="multiplyString">X</string>
+    <string name="fourString">4</string>
+    <string name="fiveString">5</string>
+    <string name="sixString">6</string>
+    <string name="subtractButton">-</string>
+    <string name="oneString">1</string>
+    <string name="twoString">2</string>
+    <string name="threeString">3</string>
+    <string name="addString">+</string>
+    <string name="posNegString">+ / -</string>
+    <string name="zeroString">0</string>
+    <string name="decimalString">.</string>
+    <string name="equalsString">=</string>
+    <string name="buttonString">Button</string>
+
+
+</resources>
