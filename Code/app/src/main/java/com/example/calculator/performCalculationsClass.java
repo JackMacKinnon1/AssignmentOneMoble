@@ -32,6 +32,20 @@ public class performCalculationsClass {
         return returnString;
     }
 
+    public String flipNum(String num) {
+        double returnNum = -1 * (Double.parseDouble(num));
+        String returnValue = "";
+        if ((returnNum % (int)returnNum) != 0) {
+            returnValue = String.valueOf(returnNum);
+        }
+        else {
+            returnValue = String.valueOf((int)returnNum);
+        }
+
+        return returnValue;
+
+    }
+
 
 
 }

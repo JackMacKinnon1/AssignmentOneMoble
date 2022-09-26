@@ -5,15 +5,18 @@ import android.os.*;
 import android.view.*;
 import android.widget.*;
 
+import java.util.Objects;
+
 
 public class MainActivity extends AppCompatActivity {
     StringBuilder stringBuilder = new StringBuilder();
     performCalculationsClass calculate = new performCalculationsClass();
 
     //variables for the number on screen
-    private double currentNumOnScreen;
-    private double firstNumber;
-    private double secondNumber;
+    private boolean decimalClicked = false;
+    private String displayNum = "0";
+    private double firstNumber = 0;
+    private double secondNumber = 0;
     private String operator = "";
     private String result = "";
 
@@ -30,11 +33,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
-
-        currentNumOnScreen = 0;
-        firstNumber = 0;
-        secondNumber = 0;
 
         //instance of controls
         clearButton = findViewById(R.id.clearButton);
@@ -70,6 +68,7 @@ public class MainActivity extends AppCompatActivity {
         eightButton.setOnClickListener(onButtonClicked);
         nineButton.setOnClickListener(onButtonClicked);
 
+
         clearButton.setOnClickListener(clearButtonClicked);
         addButton.setOnClickListener(mathOpSelect);
         subtractButton.setOnClickListener(mathOpSelect);
@@ -79,6 +78,7 @@ public class MainActivity extends AppCompatActivity {
         equalsButton.setOnClickListener(equalsClicked);
         posNegButton.setOnClickListener(flipPosNeg);
         decimalButton.setOnClickListener(placeDecimal);
+        backspaceButton.setOnClickListener(backspaceListener);
 
 
     } //end onCreate
@@ -88,46 +88,45 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void onClick(View v) {
-
-            if (currentNumOnScreen == 0) {
-                stringBuilder.setLength(0);
+            if (Objects.equals(displayNum, "0")) { //Clears display if a number is clicked and the display is currently 0
+                displayNum = "";
             }
             switch (v.getId()) {
                 case R.id.zeroButton:
-                    stringBuilder.append(0);
+                    displayNum += "0";
                     break;
                 case R.id.oneButton:
-                    stringBuilder.append(1);
+                    displayNum += "1";
                     break;
                 case R.id.twoButton:
-                    stringBuilder.append(2);
+                    displayNum += "2";
                     break;
                 case R.id.threeButton:
-                    stringBuilder.append(3);
+                    displayNum += "3";
                     break;
                 case R.id.fourButton:
-                    stringBuilder.append(4);
+                    displayNum += "4";
                     break;
                 case R.id.fiveButton:
-                    stringBuilder.append(5);
+                    displayNum += "5";
                     break;
                 case R.id.sixButton:
-                    stringBuilder.append(6);
+                    displayNum += "6";
                     break;
                 case R.id.sevenButton:
-                    stringBuilder.append(7);
+                    displayNum += "7";
                     break;
                 case R.id.eightButton:
-                    stringBuilder.append(8);
+                    displayNum += "8";
                     break;
                 case R.id.nineButton:
-                    stringBuilder.append(9);
+                    displayNum += "9";
                     break;
                 default:
                     stringBuilder.append("NaN");
                     break;
             }//end switch
-            updateScreen(stringBuilder.toString(), true);
+            updateScreen(displayNum);
         }//end method onClick
     };//end inner class
 
@@ -135,13 +134,17 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onClick(View view) {
             refreshVariables();
-            updateScreen(stringBuilder.toString(), false);
+            updateScreen("0");
+            displayNum = resultEditText.getText().toString();
         }
     };
 
     private View.OnClickListener mathOpSelect = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
+            if (!Objects.equals(operator, "")) {
+                performCalcAndUpdate();
+            }
             switch (view.getId()) {
                 case R.id.addButton:
                     operator = "+";
@@ -158,12 +161,9 @@ public class MainActivity extends AppCompatActivity {
                 default:
                     break;
             }
-
-            firstNumber = currentNumOnScreen;
-            currentNumOnScreen = 0;
-            stringBuilder.setLength(0);
-
-
+            firstNumber = Double.parseDouble(displayNum);
+            displayNum = "0";
+            decimalClicked = false;
         }
     };
 
@@ -171,12 +171,10 @@ public class MainActivity extends AppCompatActivity {
     private View.OnClickListener equalsClicked = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
-            if (operator == "") {
+            if (Objects.equals(operator, "")) {
                 return;
             }
-            secondNumber = currentNumOnScreen;
-            result = calculate.calculate(firstNumber, secondNumber, operator);
-            updateScreen(result, true);
+            performCalcAndUpdate();
             refreshVariables();
         }
     };
@@ -184,39 +182,53 @@ public class MainActivity extends AppCompatActivity {
     private View.OnClickListener flipPosNeg = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
-            if (stringBuilder.charAt(0) == '-') {
-                stringBuilder.deleteCharAt(0);
+            if (Objects.equals(displayNum, "0")) {
+                return;
             }
-            else {
-                stringBuilder.insert(0, "-");
-            }
-            updateScreen(stringBuilder.toString(), true);
+            displayNum = calculate.flipNum(displayNum);
+            updateScreen(displayNum);
         }
     };
 
     private View.OnClickListener placeDecimal = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
-            stringBuilder.append(".");
-            updateScreen(stringBuilder.toString(), true);
+            if (!decimalClicked) {
+                displayNum += ".";
+                decimalClicked = true;
+                updateScreen(displayNum);
+            }
         }
     };
 
-    private void updateScreen(String textForScreen, boolean updateDouble) {
-        if (updateDouble) {
-            currentNumOnScreen = Double.parseDouble(textForScreen);
+    private View.OnClickListener backspaceListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            if (Objects.equals(displayNum, "0")) {
+                return;
+            }
+            displayNum = displayNum.replaceAll(".$", "");
+            if (displayNum.length() == 0) displayNum = "0";
+            updateScreen(displayNum);
         }
+    };
+
+    private void performCalcAndUpdate() {
+        secondNumber = Double.parseDouble(displayNum);
+        displayNum = calculate.calculate(firstNumber, secondNumber, operator);
+        updateScreen(displayNum);
+    }
+
+    private void updateScreen(String textForScreen) {
         resultEditText.setText(textForScreen);
     }
 
     private void refreshVariables() {
         operator = "";
-        result = "";
-        currentNumOnScreen = 0;
+        displayNum = "0";
         firstNumber = 0;
         secondNumber = 0;
-        stringBuilder.setLength(0);
-        stringBuilder.append(0);
+        decimalClicked = false;
 
     }
 } //end main
