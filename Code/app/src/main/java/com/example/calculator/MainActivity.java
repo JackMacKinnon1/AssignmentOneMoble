@@ -13,7 +13,6 @@ public class MainActivity extends AppCompatActivity {
     performCalculationsClass calculate = new performCalculationsClass();
 
     //variables for the number on screen
-    private boolean decimalClicked = false;
     private String displayNum = "0";
     private double firstNumber = 0;
     private double secondNumber = 0;
@@ -163,7 +162,6 @@ public class MainActivity extends AppCompatActivity {
             }
             firstNumber = Double.parseDouble(displayNum);
             displayNum = "0";
-            decimalClicked = false;
         }
     };
 
@@ -182,9 +180,7 @@ public class MainActivity extends AppCompatActivity {
     private View.OnClickListener flipPosNeg = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
-            if (Objects.equals(displayNum, "0")) {
-                return;
-            }
+            if (!displayNum.matches(".*[1-9].*")) return;//if the display does contain at least one number between 1-9 it will return
             displayNum = calculate.flipNum(displayNum);
             updateScreen(displayNum);
         }
@@ -193,9 +189,8 @@ public class MainActivity extends AppCompatActivity {
     private View.OnClickListener placeDecimal = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
-            if (!decimalClicked) {
+            if (!displayNum.contains(".")) {
                 displayNum += ".";
-                decimalClicked = true;
                 updateScreen(displayNum);
             }
         }
@@ -228,7 +223,7 @@ public class MainActivity extends AppCompatActivity {
         displayNum = "0";
         firstNumber = 0;
         secondNumber = 0;
-        decimalClicked = false;
+
 
     }
 } //end main

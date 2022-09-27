@@ -1,5 +1,7 @@
 package com.example.calculator;
 
+import java.util.Objects;
+
 public class performCalculationsClass {
     public String calculate(double num1, double num2, String operator) {
         double returnCalc = 0;
@@ -22,25 +24,16 @@ public class performCalculationsClass {
                 break;
         }
 
-        if ((returnCalc % (int) returnCalc) != 0) {
-            returnString = String.format("%.2f", returnCalc);
-        }
-        else {
-            returnString = String.format("%d", (int)returnCalc);
-        }
-
+        returnString = String.format("%.2f", returnCalc);
+        returnString = returnString.replaceAll(".00$", "");
         return returnString;
     }
 
     public String flipNum(String num) {
         double returnNum = -1 * (Double.parseDouble(num));
         String returnValue = "";
-        if ((returnNum % (int)returnNum) != 0) {
-            returnValue = String.valueOf(returnNum);
-        }
-        else {
-            returnValue = String.valueOf((int)returnNum);
-        }
+        returnValue = String.valueOf(returnNum);
+        returnValue = returnValue.replaceAll(".0$", "");
 
         return returnValue;
 
