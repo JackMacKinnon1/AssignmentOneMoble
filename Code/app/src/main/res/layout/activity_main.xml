@@ -21,18 +21,6 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-            <Button
-                android:id="@+id/eightButton2"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:gravity="center_horizontal"
-                android:paddingVertical="25dp"
-                android:scaleX=".9"
-                android:text="@string/buttonString"
-                android:textSize="15sp"
-                android:textStyle="bold"
-                android:visibility="invisible" />
-
             <EditText
                 android:id="@+id/resultEditText"
                 android:layout_width="wrap_content"

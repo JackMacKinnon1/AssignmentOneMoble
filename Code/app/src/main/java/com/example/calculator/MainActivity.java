@@ -10,6 +10,21 @@ import android.widget.*;
 import java.util.Objects;
 
 
+
+enum previousBtn {
+    DIGIT,
+    OPERATOR,
+    EQUALS,
+    CLEAR,
+    DECIMAL,
+    POSNEG,
+    BACKSPACE
+}
+
+
+
+
+
 public class MainActivity extends AppCompatActivity {
     StringBuilder stringBuilder = new StringBuilder();
     performCalculationsClass calculate = new performCalculationsClass();
@@ -20,6 +35,7 @@ public class MainActivity extends AppCompatActivity {
     private double secondNumber = 0;
     private String operator = "";
     private String result = "";
+    private previousBtn previousBtnClk;
 
     //Creating controls
     Button clearButton, divideButton, backspaceButton, sevenButton,
@@ -89,8 +105,10 @@ public class MainActivity extends AppCompatActivity {
     //Creating listener for all number buttons to use
     private View.OnClickListener onButtonClicked = new View.OnClickListener() {
 
+
         @Override
         public void onClick(View v) {
+
             if (Objects.equals(displayNum, "0")) { //Clears display if a number is clicked and the display is currently 0
                 displayNum = "";
             }
@@ -131,6 +149,7 @@ public class MainActivity extends AppCompatActivity {
                     break;
             }//end switch
             updateScreen(displayNum);
+            updateClick(previousBtn.DIGIT);
         }//end method onClick
     };//end inner class
 
@@ -140,13 +159,18 @@ public class MainActivity extends AppCompatActivity {
             refreshVariables();
             updateScreen("0");
             displayNum = resultEditText.getText().toString();
+            updateClick(previousBtn.CLEAR);
         }
     };
 
     private View.OnClickListener mathOpSelect = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
-            if ((!Objects.equals(operator, "")) && secondNumber == 0) {
+
+            if (previousBtnClk == previousBtn.OPERATOR) {
+                return;
+            }
+            if (!Objects.equals(operator, "")) {
                 performCalcAndUpdate();
             }
             switch (view.getId()) {
@@ -165,8 +189,10 @@ public class MainActivity extends AppCompatActivity {
                 default:
                     break;
             }
-            firstNumber = Double.parseDouble(resultEditText.getText().toString());
+            firstNumber = Double.parseDouble(displayNum);
+            updateScreen(String.format("%s%s", displayNum, operator));
             displayNum = "0";
+            updateClick(previousBtn.OPERATOR);
         }
     };
 
@@ -174,42 +200,54 @@ public class MainActivity extends AppCompatActivity {
     private View.OnClickListener equalsClicked = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
+
             if (Objects.equals(operator, "")) {
                 return;
             }
             performCalcAndUpdate();
             refreshVariables();
+            updateClick(previousBtn.EQUALS);
         }
     };
 
     private View.OnClickListener flipPosNeg = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
+
             if (!displayNum.matches(".*[1-9].*")) return;//if the display does contain at least one number between 1-9 it will return
             displayNum = calculate.flipNum(displayNum);
             updateScreen(displayNum);
+            updateClick(previousBtn.POSNEG);
         }
     };
 
     private View.OnClickListener placeDecimal = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
+
             if (!displayNum.contains(".")) {
                 displayNum += ".";
                 updateScreen(displayNum);
             }
+            updateClick(previousBtn.DECIMAL);
         }
     };
 
     private View.OnClickListener backspaceListener = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
+            if (previousBtnClk == previousBtn.OPERATOR) {
+                operator = "";
+                displayNum = resultEditText.getText().toString();
+            }
+
             if (Objects.equals(displayNum, "0")) {
                 return;
             }
             displayNum = displayNum.replaceAll(".$", "");
             if (displayNum.length() == 0) displayNum = "0";
             updateScreen(displayNum);
+            updateClick(previousBtn.BACKSPACE);
         }
     };
 
@@ -230,5 +268,9 @@ public class MainActivity extends AppCompatActivity {
         secondNumber = 0;
 
 
+    }
+
+    private void updateClick(previousBtn btnClick) {
+        previousBtnClk = btnClick;
     }
 } //end main
