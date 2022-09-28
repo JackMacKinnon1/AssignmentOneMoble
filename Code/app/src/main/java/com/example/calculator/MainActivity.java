@@ -1,6 +1,8 @@
 package com.example.calculator;
 
 import androidx.appcompat.app.AppCompatActivity;
+
+import android.annotation.SuppressLint;
 import android.os.*;
 import android.view.*;
 import android.widget.*;
@@ -24,6 +26,7 @@ public class MainActivity extends AppCompatActivity {
         eightButton, nineButton, multiplyButton, fourButton, fiveButton,
         sixButton, subtractButton, oneButton, twoButton, threeButton,
         addButton, posNegButton, zeroButton, decimalButton, equalsButton;
+
 
     TextView resultEditText;
 
@@ -80,6 +83,7 @@ public class MainActivity extends AppCompatActivity {
         backspaceButton.setOnClickListener(backspaceListener);
 
 
+
     } //end onCreate
 
     //Creating listener for all number buttons to use
@@ -90,6 +94,7 @@ public class MainActivity extends AppCompatActivity {
             if (Objects.equals(displayNum, "0")) { //Clears display if a number is clicked and the display is currently 0
                 displayNum = "";
             }
+
             switch (v.getId()) {
                 case R.id.zeroButton:
                     displayNum += "0";
@@ -141,7 +146,7 @@ public class MainActivity extends AppCompatActivity {
     private View.OnClickListener mathOpSelect = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
-            if (!Objects.equals(operator, "")) {
+            if ((!Objects.equals(operator, "")) && secondNumber == 0) {
                 performCalcAndUpdate();
             }
             switch (view.getId()) {
@@ -160,7 +165,7 @@ public class MainActivity extends AppCompatActivity {
                 default:
                     break;
             }
-            firstNumber = Double.parseDouble(displayNum);
+            firstNumber = Double.parseDouble(resultEditText.getText().toString());
             displayNum = "0";
         }
     };
