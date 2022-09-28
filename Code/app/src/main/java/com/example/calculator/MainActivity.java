@@ -26,15 +26,12 @@ enum previousBtn {
 
 
 public class MainActivity extends AppCompatActivity {
-    StringBuilder stringBuilder = new StringBuilder();
     performCalculationsClass calculate = new performCalculationsClass();
 
     //variables for the number on screen
-    private String displayNum = "0";
     private double firstNumber = 0;
     private double secondNumber = 0;
     private String operator = "";
-    private String result = "";
     private previousBtn previousBtnClk;
 
     //Creating controls
@@ -108,47 +105,48 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void onClick(View v) {
+            String digitClicked = "";
 
-            if (Objects.equals(displayNum, "0")) { //Clears display if a number is clicked and the display is currently 0
-                displayNum = "";
-            }
+            if (previousBtnClk == previousBtn.OPERATOR || previousBtnClk == previousBtn.EQUALS) {updateScreen("0");}
+
+            if (Objects.equals(getDisplayedNum(), "0")) {updateScreen(digitClicked);}
 
             switch (v.getId()) {
+
                 case R.id.zeroButton:
-                    displayNum += "0";
+                    digitClicked = "0";
                     break;
                 case R.id.oneButton:
-                    displayNum += "1";
+                    digitClicked = "1";
                     break;
                 case R.id.twoButton:
-                    displayNum += "2";
+                    digitClicked = "2";
                     break;
                 case R.id.threeButton:
-                    displayNum += "3";
+                    digitClicked = "3";
                     break;
                 case R.id.fourButton:
-                    displayNum += "4";
+                    digitClicked = "4";
                     break;
                 case R.id.fiveButton:
-                    displayNum += "5";
+                    digitClicked = "5";
                     break;
                 case R.id.sixButton:
-                    displayNum += "6";
+                    digitClicked = "6";
                     break;
                 case R.id.sevenButton:
-                    displayNum += "7";
+                    digitClicked = "7";
                     break;
                 case R.id.eightButton:
-                    displayNum += "8";
+                    digitClicked = "8";
                     break;
                 case R.id.nineButton:
-                    displayNum += "9";
+                    digitClicked = "9";
                     break;
                 default:
-                    stringBuilder.append("NaN");
                     break;
             }//end switch
-            updateScreen(displayNum);
+            updateScreen(getDisplayedNum() + digitClicked);
             updateClick(previousBtn.DIGIT);
         }//end method onClick
     };//end inner class
@@ -158,7 +156,6 @@ public class MainActivity extends AppCompatActivity {
         public void onClick(View view) {
             refreshVariables();
             updateScreen("0");
-            displayNum = resultEditText.getText().toString();
             updateClick(previousBtn.CLEAR);
         }
     };
@@ -168,9 +165,9 @@ public class MainActivity extends AppCompatActivity {
         public void onClick(View view) {
 
             if (previousBtnClk == previousBtn.OPERATOR) {
-                return;
+                updateScreen(removeLast(getDisplayedNum(), " .$"));
             }
-            if (!Objects.equals(operator, "")) {
+            else if (!Objects.equals(operator, "")) {
                 performCalcAndUpdate();
             }
             switch (view.getId()) {
@@ -189,9 +186,8 @@ public class MainActivity extends AppCompatActivity {
                 default:
                     break;
             }
-            firstNumber = Double.parseDouble(displayNum);
-            updateScreen(String.format("%s%s", displayNum, operator));
-            displayNum = "0";
+            firstNumber = Double.parseDouble(getDisplayedNum());
+            updateScreen(String.format("%s %s", getDisplayedNum(), operator));
             updateClick(previousBtn.OPERATOR);
         }
     };
@@ -214,9 +210,11 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onClick(View view) {
 
-            if (!displayNum.matches(".*[1-9].*")) return;//if the display does contain at least one number between 1-9 it will return
-            displayNum = calculate.flipNum(displayNum);
-            updateScreen(displayNum);
+            if (!getDisplayedNum().matches("-?[0-9]+[\\.]?[0-9]*")) return; //Checks if there is a char in the string that is not a negative or a digit
+
+
+            if (!getDisplayedNum().matches(".*[1-9].*")) return;//if the display does contain at least one number between 1-9 it will return
+            updateScreen(calculate.flipNum(getDisplayedNum()));
             updateClick(previousBtn.POSNEG);
         }
     };
@@ -225,9 +223,8 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onClick(View view) {
 
-            if (!displayNum.contains(".")) {
-                displayNum += ".";
-                updateScreen(displayNum);
+            if (!getDisplayedNum().contains(".")) {
+                updateScreen(getDisplayedNum() + ".");
             }
             updateClick(previousBtn.DECIMAL);
         }
@@ -236,24 +233,31 @@ public class MainActivity extends AppCompatActivity {
     private View.OnClickListener backspaceListener = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
-            if (previousBtnClk == previousBtn.OPERATOR) {
-                operator = "";
-                displayNum = resultEditText.getText().toString();
-            }
-
-            if (Objects.equals(displayNum, "0")) {
+            if (Objects.equals(getDisplayedNum(), "0")) { //Returns because if the display is set to "0" we dont want zero to be removed
                 return;
             }
-            displayNum = displayNum.replaceAll(".$", "");
-            if (displayNum.length() == 0) displayNum = "0";
-            updateScreen(displayNum);
+
+
+            String regex;
+
+            if (previousBtnClk == previousBtn.OPERATOR) {
+                operator = "";
+                regex = " .$"; //Will remove a space in the regex as well as the last char because an operator has an added space before the number
+            }
+            else {
+                regex = ".$";
+            }
+
+            updateScreen(removeLast(getDisplayedNum(), regex));
+
+            if (getDisplayedNum().length() == 0) updateScreen("0"); //Sets the screen display to zero if backspace is pressed with only one number in it
             updateClick(previousBtn.BACKSPACE);
         }
     };
 
     private void performCalcAndUpdate() {
-        secondNumber = Double.parseDouble(displayNum);
-        displayNum = calculate.calculate(firstNumber, secondNumber, operator);
+        secondNumber = Double.parseDouble(getDisplayedNum());
+        String displayNum = calculate.calculate(firstNumber, secondNumber, operator);
         updateScreen(displayNum);
     }
 
@@ -263,7 +267,6 @@ public class MainActivity extends AppCompatActivity {
 
     private void refreshVariables() {
         operator = "";
-        displayNum = "0";
         firstNumber = 0;
         secondNumber = 0;
 
@@ -272,5 +275,11 @@ public class MainActivity extends AppCompatActivity {
 
     private void updateClick(previousBtn btnClick) {
         previousBtnClk = btnClick;
+    }
+    private String getDisplayedNum() {
+        return resultEditText.getText().toString();
+    }
+    private String removeLast(String inputStr, String regex) {
+        return inputStr.replaceAll(regex, "");
     }
 } //end main
