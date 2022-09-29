@@ -12,10 +12,10 @@ import java.util.Objects;
 
 
 enum previousBtn {
-    DIGIT,
-    OPERATOR,
-    EQUALS,
-    CLEAR,
+    DIGIT, //0
+    OPERATOR, //1
+    EQUALS, //2
+    CLEAR, //3
     DECIMAL,
     POSNEG,
     BACKSPACE
@@ -107,7 +107,7 @@ public class MainActivity extends AppCompatActivity {
         public void onClick(View v) {
             String digitClicked = "";
 
-            if (previousBtnClk == previousBtn.OPERATOR || previousBtnClk == previousBtn.EQUALS) {updateScreen("0");}
+            if (previousBtnClk == previousBtn.OPERATOR || previousBtnClk == previousBtn.EQUALS) {updateScreen("0");} //Checks if previous btn is an operator OR a equals
 
             if (Objects.equals(getDisplayedNum(), "0")) {updateScreen(digitClicked);}
 
