@@ -9,8 +9,6 @@ import android.widget.*;
 
 import java.util.Objects;
 
-
-
 enum previousBtn {
     DIGIT, //0
     OPERATOR, //1
@@ -18,7 +16,8 @@ enum previousBtn {
     CLEAR, //3
     DECIMAL,
     POSNEG,
-    BACKSPACE
+    BACKSPACE,
+    STARTUP
 }
 
 
@@ -29,16 +28,16 @@ public class MainActivity extends AppCompatActivity {
     performCalculationsClass calculate = new performCalculationsClass();
 
     //variables for the number on screen
-    private double firstNumber = 0;
-    private double secondNumber = 0;
+    private String firstNumber = "0";
+    private String secondNumber = "0";
     private String operator = "";
-    private previousBtn previousBtnClk;
+    private previousBtn previousBtnClk = previousBtn.STARTUP;
 
     //Creating controls
     Button clearButton, divideButton, backspaceButton, sevenButton,
-        eightButton, nineButton, multiplyButton, fourButton, fiveButton,
-        sixButton, subtractButton, oneButton, twoButton, threeButton,
-        addButton, posNegButton, zeroButton, decimalButton, equalsButton;
+            eightButton, nineButton, multiplyButton, fourButton, fiveButton,
+            sixButton, subtractButton, oneButton, twoButton, threeButton,
+            addButton, posNegButton, zeroButton, decimalButton, equalsButton;
 
 
     TextView resultEditText;
@@ -96,80 +95,72 @@ public class MainActivity extends AppCompatActivity {
         backspaceButton.setOnClickListener(backspaceListener);
 
 
-
     } //end onCreate
 
-    //Creating listener for all number buttons to use
+
     private View.OnClickListener onButtonClicked = new View.OnClickListener() {
-
-
         @Override
         public void onClick(View v) {
             String digitClicked = "";
 
-            if (previousBtnClk == previousBtn.OPERATOR || previousBtnClk == previousBtn.EQUALS) {updateScreen("0");} //Checks if previous btn is an operator OR a equals
+            if (getDisplayedNum().equals("0") || previousBtnClk == previousBtn.OPERATOR) updateScreen(digitClicked);
+            //If the display holds only zero, or the last button selected is a math operator display will clear to hold the number that was entered
 
-            if (Objects.equals(getDisplayedNum(), "0")) {updateScreen(digitClicked);}
+            if (getDisplayedNum().matches("^-0")) {//Screen holds -0, so any number the user clicks will have a negative in front
+                updateScreen(digitClicked);
+                digitClicked += "-";
+            }
 
             switch (v.getId()) {
 
                 case R.id.zeroButton:
-                    digitClicked = "0";
+                    digitClicked += "0";
                     break;
                 case R.id.oneButton:
-                    digitClicked = "1";
+                    digitClicked += "1";
                     break;
                 case R.id.twoButton:
-                    digitClicked = "2";
+                    digitClicked += "2";
                     break;
                 case R.id.threeButton:
-                    digitClicked = "3";
+                    digitClicked += "3";
                     break;
                 case R.id.fourButton:
-                    digitClicked = "4";
+                    digitClicked += "4";
                     break;
                 case R.id.fiveButton:
-                    digitClicked = "5";
+                    digitClicked += "5";
                     break;
                 case R.id.sixButton:
-                    digitClicked = "6";
+                    digitClicked += "6";
                     break;
                 case R.id.sevenButton:
-                    digitClicked = "7";
+                    digitClicked += "7";
                     break;
                 case R.id.eightButton:
-                    digitClicked = "8";
+                    digitClicked += "8";
                     break;
                 case R.id.nineButton:
-                    digitClicked = "9";
+                    digitClicked += "9";
                     break;
                 default:
                     break;
             }//end switch
-            updateScreen(getDisplayedNum() + digitClicked);
-            updateClick(previousBtn.DIGIT);
-        }//end method onClick
-    };//end inner class
 
-    private View.OnClickListener clearButtonClicked = new View.OnClickListener() {
-        @Override
-        public void onClick(View view) {
-            refreshVariables();
-            updateScreen("0");
-            updateClick(previousBtn.CLEAR);
-        }
-    };
+            String currentNumberOnScreen = getDisplayedNum();
+            updateScreen(currentNumberOnScreen + digitClicked); //Appends clicked number to screen
+
+            updateClick(previousBtn.DIGIT); //Sets the last button pressed as a digit
+        }//End onClick method
+    };//End inner class
 
     private View.OnClickListener mathOpSelect = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
 
-            if (previousBtnClk == previousBtn.OPERATOR) {
-                updateScreen(removeLast(getDisplayedNum(), " .$"));
-            }
-            else if (!Objects.equals(operator, "")) {
-                performCalcAndUpdate();
-            }
+            if (Objects.equals(firstNumber, "0")) firstNumber = getDisplayedNum();
+            //If an operator is selected and the firstNumber is not set than the number on screen is saved as the first number
+
             switch (view.getId()) {
                 case R.id.addButton:
                     operator = "+";
@@ -185,101 +176,95 @@ public class MainActivity extends AppCompatActivity {
                     break;
                 default:
                     break;
-            }
-            firstNumber = Double.parseDouble(getDisplayedNum());
-            updateScreen(String.format("%s %s", getDisplayedNum(), operator));
+            }//end switch
+
+            updateScreen(operator); //Clears the display and adds the operator to it
             updateClick(previousBtn.OPERATOR);
         }
     };
-
 
     private View.OnClickListener equalsClicked = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
 
-            if (Objects.equals(operator, "")) {
+            if (Objects.equals(operator, "") || !isNum(getDisplayedNum())) {
                 return;
             }
             performCalcAndUpdate();
             refreshVariables();
             updateClick(previousBtn.EQUALS);
-        }
-    };
+        }//End onClick method
+    };//End inner class
 
-    private View.OnClickListener flipPosNeg = new View.OnClickListener() {
+    private View.OnClickListener backspaceListener = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
+            if (getDisplayedNum().equals("0")) return; //Ends handler if display is already zero
+            if (previousBtnClk == previousBtn.OPERATOR) return; //Ends handler if previous button clicked is an operator
 
-            if (!getDisplayedNum().matches("-?[0-9]+[\\.]?[0-9]*")) return; //Checks if there is a char in the string that is not a negative or a digit
-
-
-            if (!getDisplayedNum().matches(".*[1-9].*")) return;//if the display does contain at least one number between 1-9 it will return
-            updateScreen(calculate.flipNum(getDisplayedNum()));
-            updateClick(previousBtn.POSNEG);
-        }
-    };
+            String updatedValue = getDisplayedNum().replaceAll(".$", "");
+            if (updatedValue.matches("")) updatedValue = "0";
+            updateScreen(updatedValue);
+        }//End onClick method
+    };//End inner class
 
     private View.OnClickListener placeDecimal = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
+            if (!isNum(getDisplayedNum())) return; //If the value on screen is not a num it will return
 
             if (!getDisplayedNum().contains(".")) {
                 updateScreen(getDisplayedNum() + ".");
             }
             updateClick(previousBtn.DECIMAL);
-        }
-    };
+        }//End onClick method
+    };//End inner class
 
-    private View.OnClickListener backspaceListener = new View.OnClickListener() {
+
+
+    private View.OnClickListener flipPosNeg = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
-            if (Objects.equals(getDisplayedNum(), "0")) { //Returns because if the display is set to "0" we dont want zero to be removed
-                return;
-            }
 
+            if (!isNum(getDisplayedNum())) updateScreen("0"); //if screen is not a number, will clear screen and add -0 to it
 
-            String regex;
+            updateScreen(calculate.flipNum(getDisplayedNum()));
+            updateClick(previousBtn.POSNEG);
+        }//End onClick method
+    };//End inner class
 
-            if (previousBtnClk == previousBtn.OPERATOR) {
-                operator = "";
-                regex = " .$"; //Will remove a space in the regex as well as the last char because an operator has an added space before the number
-            }
-            else {
-                regex = ".$";
-            }
-
-            updateScreen(removeLast(getDisplayedNum(), regex));
-
-            if (getDisplayedNum().length() == 0) updateScreen("0"); //Sets the screen display to zero if backspace is pressed with only one number in it
-            updateClick(previousBtn.BACKSPACE);
+    private View.OnClickListener clearButtonClicked = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            refreshVariables();
+            updateScreen("0");
+            updateClick(previousBtn.CLEAR);
         }
     };
 
-    private void performCalcAndUpdate() {
-        secondNumber = Double.parseDouble(getDisplayedNum());
-        String displayNum = calculate.calculate(firstNumber, secondNumber, operator);
-        updateScreen(displayNum);
-    }
 
-    private void updateScreen(String textForScreen) {
-        resultEditText.setText(textForScreen);
-    }
+
+
+
+
+
+    private void performCalcAndUpdate() {
+        secondNumber = getDisplayedNum();
+        String displayNum = calculate.calculate(Double.parseDouble(firstNumber), Double.parseDouble(secondNumber), operator);
+        updateScreen(displayNum);
+    }//End perfomCalcAndUpdate method
 
     private void refreshVariables() {
         operator = "";
-        firstNumber = 0;
-        secondNumber = 0;
+        firstNumber = "0";
+        secondNumber = "0";
+    }//End refreshVariables method
 
+    private String getDisplayedNum() {return resultEditText.getText().toString();}
 
-    }
+    private void updateScreen(String textForScreen) {resultEditText.setText(textForScreen);}
 
-    private void updateClick(previousBtn btnClick) {
-        previousBtnClk = btnClick;
-    }
-    private String getDisplayedNum() {
-        return resultEditText.getText().toString();
-    }
-    private String removeLast(String inputStr, String regex) {
-        return inputStr.replaceAll(regex, "");
-    }
+    private void updateClick(previousBtn btnClick) {previousBtnClk = btnClick;}
+
+    private boolean isNum(String value) {return value.matches("-?[0-9]+[\\.]?[0-9]*");}
 } //end main

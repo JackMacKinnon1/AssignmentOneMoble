@@ -30,10 +30,13 @@ public class performCalculationsClass {
     }
 
     public String flipNum(String num) {
-        double returnNum = -1 * (Double.parseDouble(num));
         String returnValue = "";
-        returnValue = String.valueOf(returnNum);
-        returnValue = returnValue.replaceAll(".0$", "");
+        if (num.startsWith("-")) { //Checks if the first value in the string is a negative sin
+            returnValue = num.replaceFirst("^-", ""); //Replaces the negative with empty string
+        }
+        else {
+            returnValue = "-" + num; //Adds a negative to the front of the number given
+        }
 
         return returnValue;
 
