@@ -9,7 +9,7 @@ import android.widget.*;
 
 import java.util.Objects;
 
-enum previousBtn {
+enum previousBtn { //Enum for the previous button that has been pressed
     DIGIT, //0
     OPERATOR, //1
     EQUALS, //2
@@ -17,7 +17,6 @@ enum previousBtn {
     DECIMAL,
     POSNEG,
     BACKSPACE,
-    STARTUP
 }
 
 
@@ -31,7 +30,7 @@ public class MainActivity extends AppCompatActivity {
     private String firstNumber = "0";
     private String secondNumber = "0";
     private String operator = "";
-    private previousBtn previousBtnClk = previousBtn.STARTUP;
+    private previousBtn previousBtnClk;
 
     //Creating controls
     Button clearButton, divideButton, backspaceButton, sevenButton,
@@ -101,7 +100,7 @@ public class MainActivity extends AppCompatActivity {
     private View.OnClickListener onButtonClicked = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            String digitClicked = "";
+            String digitClicked = ""; //Empty string to hold the operator
 
             if (getDisplayedNum().equals("0") || previousBtnClk == previousBtn.OPERATOR) updateScreen(digitClicked);
             //If the display holds only zero, or the last button selected is a math operator display will clear to hold the number that was entered
@@ -158,7 +157,13 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onClick(View view) {
 
-            if (Objects.equals(firstNumber, "0")) firstNumber = getDisplayedNum();
+            if (previousBtnClk == previousBtn.DIGIT && !Objects.equals(firstNumber, "0")) {//This checks if the last button pressed is a digit, and the first number is not zero, meaning that they are using a "rolling" calculation
+                performCalcAndUpdate(); //Updates scren with resulting calculation
+                firstNumber = getDisplayedNum();// sets the first number variable to the result on screen
+            }
+
+
+            else if (Objects.equals(firstNumber, "0")) firstNumber = getDisplayedNum();
             //If an operator is selected and the firstNumber is not set than the number on screen is saved as the first number
 
             switch (view.getId()) {
@@ -187,9 +192,8 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onClick(View view) {
 
-            if (Objects.equals(operator, "") || !isNum(getDisplayedNum())) {
-                return;
-            }
+            if (Objects.equals(operator, "") || !isNum(getDisplayedNum())) return; //If the operator is not set or the display is not holding a number it means the equals button is invalid
+
             performCalcAndUpdate();
             refreshVariables();
             updateClick(previousBtn.EQUALS);
@@ -202,8 +206,8 @@ public class MainActivity extends AppCompatActivity {
             if (getDisplayedNum().equals("0")) return; //Ends handler if display is already zero
             if (previousBtnClk == previousBtn.OPERATOR) return; //Ends handler if previous button clicked is an operator
 
-            String updatedValue = getDisplayedNum().replaceAll(".$", "");
-            if (updatedValue.matches("")) updatedValue = "0";
+            String updatedValue = getDisplayedNum().replaceAll(".$", ""); //Replaces the last digit in the string with empty char
+            if (updatedValue.matches("")) updatedValue = "0"; //If the updated value as a whole is empty than it will set the value as 0
             updateScreen(updatedValue);
         }//End onClick method
     };//End inner class
@@ -213,7 +217,7 @@ public class MainActivity extends AppCompatActivity {
         public void onClick(View view) {
             if (!isNum(getDisplayedNum())) return; //If the value on screen is not a num it will return
 
-            if (!getDisplayedNum().contains(".")) {
+            if (!getDisplayedNum().contains(".")) { //Checks if the number on screen doesnt have a decimal in it
                 updateScreen(getDisplayedNum() + ".");
             }
             updateClick(previousBtn.DECIMAL);
@@ -249,8 +253,8 @@ public class MainActivity extends AppCompatActivity {
 
 
     private void performCalcAndUpdate() {
-        secondNumber = getDisplayedNum();
-        String displayNum = calculate.calculate(Double.parseDouble(firstNumber), Double.parseDouble(secondNumber), operator);
+        secondNumber = getDisplayedNum(); //logs the second number as the number held in the resultEditText
+        String displayNum = calculate.calculate(Double.parseDouble(firstNumber), Double.parseDouble(secondNumber), operator); //performs calculation
         updateScreen(displayNum);
     }//End perfomCalcAndUpdate method
 

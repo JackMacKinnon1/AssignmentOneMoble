@@ -6,7 +6,7 @@ public class performCalculationsClass {
     public String calculate(double num1, double num2, String operator) {
         double returnCalc = 0;
         String returnString;
-        switch (operator) {
+        switch (operator) { //Determine which operator was provided
             case "+":
                 returnCalc = num1 + num2;
                 break;
@@ -18,14 +18,14 @@ public class performCalculationsClass {
                 break;
             case "/":
                 if (num2 == 0) {
-                    return "NaN";
+                    return "NaN"; //Returns NaN because it was a division by 0
                 }
                 returnCalc = num1 / num2;
                 break;
         }
 
         returnString = String.format("%.2f", returnCalc);
-        returnString = returnString.replaceAll(".00$", "");
+        returnString = returnString.replaceAll(".00$", ""); //Replaces .00 with empty string because the zeros are redundant
         return returnString;
     }
 
